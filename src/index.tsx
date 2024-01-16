@@ -12,11 +12,6 @@ export default function Command() {
   const [firstNumberError, setFirstNumberError] = useState<string | undefined>();
   const [secondNumberError, setSecondNumberError] = useState<string | undefined>();
 
-  const [hasInteracted, setHasInteracted] = useState({
-    firstNumber: false,
-    secondNumber: false
-  });
-  
 
   function dropFirstNumberErrorIfNeeded() {
     if (firstNumberError) {
