@@ -28,7 +28,6 @@ export default function Command() {
   }
 
   async function handleSubmit(values: { firstNumber: string; secondNumber: string }) {
-
     const isValidFirstNumber = validateNumber(values.firstNumber);
     const isValidSecondNumber = validateNumber(values.secondNumber);
 
