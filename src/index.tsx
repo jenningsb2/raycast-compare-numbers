@@ -27,6 +27,44 @@ export default function Command() {
     return !isNaN(parseFloat(value)) && isFinite(parseFloat(value));
   }
 
+  function calculatePercentageChange(oldValue: number, newValue: number): string {
+    let decimalPlaces = parseInt(preferences.decimalPlaces);
+
+    // Validate decimalPlaces to be within the range 0-20
+    if (isNaN(decimalPlaces) || decimalPlaces < 0 || decimalPlaces > 20) {
+      decimalPlaces = 2; // Set a sensible default
+    }
+
+    const percentageChange = ((newValue - oldValue) / oldValue) * 100;
+    const formattedResult = new Intl.NumberFormat("en-US", {
+      style: "decimal",
+      maximumFractionDigits: decimalPlaces,
+    }).format(percentageChange);
+    
+    return `${formattedResult}%`;
+  }
+
+  async function handleCalculate(values: { firstNumber: string; secondNumber: string }) {
+    const isValidFirstNumber = validateNumber(values.firstNumber);
+    const isValidSecondNumber = validateNumber(values.secondNumber);
+
+    if (!isValidFirstNumber || !isValidSecondNumber) {
+      if (!isValidFirstNumber) {
+        setFirstNumberError("Please enter a valid number");
+      }
+      if (!isValidSecondNumber) {
+        setSecondNumberError("Please enter a valid number");
+      }
+      return;
+    }
+
+    const oldValue = parseFloat(values.firstNumber);
+    const newValue = parseFloat(values.secondNumber);
+    const resultText = calculatePercentageChange(oldValue, newValue);
+
+    showToast({ title: "Result", message: "The percentage change is: " + resultText });
+  }
+
   async function handleSubmit(values: { firstNumber: string; secondNumber: string }) {
     const isValidFirstNumber = validateNumber(values.firstNumber);
     const isValidSecondNumber = validateNumber(values.secondNumber);
@@ -43,20 +81,7 @@ export default function Command() {
 
     const oldValue = parseFloat(values.firstNumber);
     const newValue = parseFloat(values.secondNumber);
-
-    let decimalPlaces = parseInt(preferences.decimalPlaces);
-
-    // Validate decimalPlaces to be within the range 0-20
-    if (isNaN(decimalPlaces) || decimalPlaces < 0 || decimalPlaces > 20) {
-      decimalPlaces = 2; // Set a sensible default
-    }
-
-    const percentageChange = ((newValue - oldValue) / oldValue) * 100;
-    const formattedResult = new Intl.NumberFormat("en-US", {
-      style: "decimal",
-      maximumFractionDigits: decimalPlaces,
-    }).format(percentageChange);
-    const resultText = `${formattedResult}%`;
+    const resultText = calculatePercentageChange(oldValue, newValue);
 
     await Clipboard.copy(resultText);
     showToast({ title: "Copied", message: "The percentage change is: " + resultText });
@@ -67,6 +92,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Calculate and Copy" onSubmit={handleSubmit} icon={Icon.CopyClipboard} />
+          <Action.SubmitForm title="Just Calculate" onSubmit={handleCalculate} icon={Icon.MagnifyingGlass} />
           <Action title="Open Extension Preferences" onAction={openExtensionPreferences} icon={Icon.Cog} />
         </ActionPanel>
       }
